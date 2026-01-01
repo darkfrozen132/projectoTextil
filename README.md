@@ -1,57 +1,173 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🏭 Proyecto Textil - Sistema de Gestión
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Sistema integral para la gestión de trabajadores y órdenes de producción en una planta textil.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📁 Estructura del Proyecto
 
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
+```
+projectoTextil/
+├── backend/          # API REST con NestJS (Arquitectura MVC)
+│   ├── src/
+│   │   ├── controllers/    # 🎮 Controladores HTTP
+│   │   ├── models/         # 📦 Modelos (Entities + DTOs)
+│   │   ├── services/       # ⚙️ Lógica de negocio
+│   │   ├── modules/        # 📦 Módulos de NestJS
+│   │   └── config/         # ⚙️ Configuraciones
+│   └── README.md
+│
+├── frontend/         # Aplicación React + Vite
+│   ├── src/
+│   │   ├── components/     # Componentes reutilizables
+│   │   ├── pages/          # Páginas de la aplicación
+│   │   ├── services/       # Servicios API
+│   │   └── types/          # Tipos TypeScript
+│   └── README.md
+│
+└── README.md         # Este archivo
 ```
 
-## Compile and run the project
+## 🏗️ Arquitectura
 
+### Backend - NestJS con MVC
+El backend sigue el patrón **MVC (Model-View-Controller)**:
+- **Models**: Entidades TypeORM + DTOs de validación
+- **Controllers**: Endpoints HTTP REST
+- **Services**: Lógica de negocio
+
+Tecnologías:
+- NestJS (Framework)
+- TypeScript
+- TypeORM (ORM)
+- MySQL (Base de datos)
+- class-validator (Validación)
+
+### Frontend - React SPA
+El frontend es una Single Page Application:
+- React 18
+- TypeScript
+- Vite (Build tool)
+- React Router (Navegación)
+- Axios (HTTP Client)
+
+## 🚀 Instalación Rápida
+
+### Prerrequisitos
+- Node.js 18+
+- MySQL 8+
+- npm o yarn
+
+### Instrucciones para el Backend
+
+1. Entra a la carpeta backend:
+   ```bash
+   cd backend
+   ```
+2. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+3. Configura las variables de entorno:
+   ```bash
+   # Crea un archivo .env con tus credenciales de MySQL
+   PORT=3000
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USERNAME=root
+   DB_PASSWORD=tu_password
+   DB_DATABASE=proyecto_textil
+   ```
+4. Ejecuta el servidor en modo desarrollo:
+   ```bash
+   npm run start:dev
+   ```
+
+El backend estará disponible en `http://localhost:3000`
+
+### Instrucciones para el Frontend
+
+1. Entra a la carpeta frontend:
+   ```bash
+   cd frontend
+   ```
+2. Instala las dependencias:
+   ```bash
+   npm install
+   ```
+3. Ejecuta el servidor de desarrollo:
+   ```bash
+   npm run dev
+   ```
+
+El frontend estará disponible en `http://localhost:5173`
+
+## 📚 Documentación
+
+- [Backend - Arquitectura MVC](backend/ARQUITECTURA-MVC.md) - Guía completa del patrón MVC
+- [Backend - README](backend/README.md) - Documentación del backend
+- [Frontend - README](frontend/README.md) - Documentación del frontend
+
+## 🔌 API Endpoints
+
+### Trabajadores
+- `GET /trabajadores` - Listar todos los trabajadores
+- `GET /trabajadores/:id` - Obtener trabajador por ID
+- `GET /trabajadores/dni/:dni` - Obtener trabajador por DNI
+- `POST /trabajadores` - Crear nuevo trabajador
+- `PATCH /trabajadores/:id` - Actualizar trabajador
+- `DELETE /trabajadores/:id` - Eliminar trabajador
+
+### Órdenes de Producción
+- `GET /orden-produccion` - Listar todas las órdenes
+- `GET /orden-produccion/:id` - Obtener orden por ID
+- `POST /orden-produccion` - Crear nueva orden
+- `PATCH /orden-produccion/:id` - Actualizar orden
+- `DELETE /orden-produccion/:id` - Eliminar orden
+
+## 🗄️ Base de Datos
+
+El script SQL para crear la base de datos se encuentra en el archivo `datos.txt`.
+
+### Tablas principales:
+- **trabajadores**: Información de los trabajadores
+- **orden_produccion**: Órdenes de producción textil
+
+## 🛠️ Scripts Disponibles
+
+### Backend
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev    # Desarrollo con hot-reload
+npm run start:prod   # Producción
+npm run build        # Compilar
+npm run test         # Tests unitarios
+npm run test:e2e     # Tests e2e
+npm run lint         # Linting
 ```
 
-## Run tests
-
+### Frontend
 ```bash
-# unit tests
-$ npm run test
+npm run dev          # Desarrollo con Vite
+npm run build        # Compilar para producción
+npm run preview      # Preview de producción
+npm run lint         # Linting
+```
 
-# e2e tests
-$ npm run test:e2e
+## 🎨 Características
+
+✅ **Arquitectura MVC** - Backend organizado siguiendo el patrón Model-View-Controller
+✅ **TypeScript** - Backend y frontend con tipado fuerte
+✅ **Validación de datos** - DTOs con class-validator
+✅ **ORM** - TypeORM para gestión elegante de base de datos
+✅ **Interfaz moderna** - React con componentes reutilizables
+✅ **Código organizado** - Estructura clara y mantenible
+✅ **Hot-reload** - Desarrollo ágil tanto en backend como frontend
+
+## 📝 Licencia
+
+UNLICENSED - Proyecto privado
+
+---
+
+> **Nota**: Este proyecto ha sido reestructurado siguiendo el patrón de arquitectura MVC para mejorar la organización, mantenibilidad y escalabilidad del código.
 
 # test coverage
 $ npm run test:cov

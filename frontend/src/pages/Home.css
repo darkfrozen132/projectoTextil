@@ -1,0 +1,53 @@
+.home {
+  text-align: center;
+  padding: 2rem;
+}
+
+.home-description {
+  font-size: 1.2rem;
+  margin: 2rem 0;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.home-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.home-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 8px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.home-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(100, 108, 255, 0.3);
+}
+
+.home-card h2 {
+  color: #646cff;
+  margin-bottom: 1rem;
+}
+
+.home-card p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (prefers-color-scheme: light) {
+  .home-description {
+    color: #555;
+  }
+  
+  .home-card {
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .home-card p {
+    color: #666;
+  }
+}

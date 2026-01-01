@@ -1,0 +1,165 @@
+-- 1. Crear base de datos y usarla
+CREATE DATABASE IF NOT EXISTS textil_produccion CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE textil_produccion;
+
+-- 2. Catálogo de tipos de fase
+CREATE TABLE fase_tipo (
+    id_fase_tipo INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(32) NOT NULL UNIQUE, -- IMPRESION, PLANCHADO, CORTE_LASER
+    nombre VARCHAR(64) NOT NULL,
+    descripcion VARCHAR(255)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3. Tabla de usuarios (opcional pero recomendado)
+CREATE TABLE usuario (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(64) NOT NULL UNIQUE,
+    nombre VARCHAR(128),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4. Tabla de cabecera de orden de producción
+CREATE TABLE orden_produccion (
+    id_orden INT AUTO_INCREMENT PRIMARY KEY,
+    nro_orden VARCHAR(32) NOT NULL UNIQUE,
+    nro_nota_venta VARCHAR(32),
+    fecha_registro DATE NOT NULL,
+    cliente_nombre VARCHAR(128) NOT NULL,
+    tipo_trabajo VARCHAR(64),
+    incluye_corte_laser ENUM('SI','NO') NOT NULL,
+    dificultad_diseno VARCHAR(64),
+    cantidad_piezas INT,
+    metraje_asignado DECIMAL(10,2),
+    ancho_asignado DECIMAL(10,2),
+    prioridad_orden INT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5. Tabla de centro de trabajo (máquinas/estaciones)
+CREATE TABLE centro_trabajo (
+    id_centro_trabajo INT AUTO_INCREMENT PRIMARY KEY,
+    codigo VARCHAR(32) NOT NULL UNIQUE,
+    nombre VARCHAR(128) NOT NULL,
+    id_fase_tipo INT NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_fase_tipo) REFERENCES fase_tipo(id_fase_tipo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. Tabla de fases de orden (solo campos comunes)
+CREATE TABLE orden_fase (
+    id_fase INT AUTO_INCREMENT PRIMARY KEY,
+    id_orden INT NOT NULL,
+    id_fase_tipo INT NOT NULL,
+    secuencia INT NOT NULL,
+    estado ENUM('PENDIENTE','LISTA','EN_PROCESO','BLOQUEADA','TERMINADA','CANCELADA') NOT NULL,
+    prioridad_guia INT NULL,
+    fecha_inicio_prog DATETIME,
+    fecha_fin_prog DATETIME,
+    fecha_inicio_real DATETIME,
+    fecha_fin_real DATETIME,
+    cantidad_plan DECIMAL(10,2),
+    cantidad_ok DECIMAL(10,2),
+    cantidad_merma DECIMAL(10,2),
+    comentario_general TEXT,
+    id_centro_trabajo INT NULL, -- última máquina asignada (opcional)
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_orden) REFERENCES orden_produccion(id_orden),
+    FOREIGN KEY (id_fase_tipo) REFERENCES fase_tipo(id_fase_tipo),
+    FOREIGN KEY (id_centro_trabajo) REFERENCES centro_trabajo(id_centro_trabajo)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_orden_fase_orden_secuencia ON orden_fase(id_orden, secuencia);
+CREATE INDEX idx_orden_fase_tipo_estado ON orden_fase(id_fase_tipo, estado);
+CREATE INDEX idx_orden_fase_estado_prioridad ON orden_fase(estado, prioridad_guia);
+
+-- 7. Tablas específicas por tipo de fase (1:1 con orden_fase)
+CREATE TABLE fase_impresion (
+    id_fase INT PRIMARY KEY,
+    fecha_impresion DATE,
+    ancho_papel_impreso DECIMAL(10,2),
+    metraje_real_impreso DECIMAL(10,2),
+    nro_pass VARCHAR(32),
+    ploter_responsable VARCHAR(128),
+    FOREIGN KEY (id_fase) REFERENCES orden_fase(id_fase) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE fase_planchado (
+    id_fase INT PRIMARY KEY,
+    fecha_planchado DATE,
+    calandra_responsable VARCHAR(128),
+    temperatura_planchada VARCHAR(32),
+    uso_papel_recubrimiento ENUM('SI','NO'),
+    fecha_termino_planchado DATE,
+    FOREIGN KEY (id_fase) REFERENCES orden_fase(id_fase) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE fase_corte_laser (
+    id_fase INT PRIMARY KEY,
+    fecha_inicio_corte DATE,
+    encargado_corte VARCHAR(128),
+    cortadora_responsable VARCHAR(128),
+    comentario TEXT,
+    fecha_termino_corte DATE,
+    FOREIGN KEY (id_fase) REFERENCES orden_fase(id_fase) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. Tabla de asignación de fases a máquinas (historial)
+CREATE TABLE asignacion_fase (
+    id_asignacion INT AUTO_INCREMENT PRIMARY KEY,
+    id_fase INT NOT NULL,
+    id_centro_trabajo INT NOT NULL,
+    estado_asignacion ENUM('EN_PROCESO','PAUSADA','FINALIZADA','CANCELADA') NOT NULL,
+    asignado_por INT NULL,
+    asignado_at DATETIME NOT NULL,
+    inicio_at DATETIME NOT NULL,
+    fin_at DATETIME NULL,
+    nota TEXT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_fase) REFERENCES orden_fase(id_fase),
+    FOREIGN KEY (id_centro_trabajo) REFERENCES centro_trabajo(id_centro_trabajo),
+    FOREIGN KEY (asignado_por) REFERENCES usuario(id_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE INDEX idx_asignacion_centro_estado_fecha ON asignacion_fase(id_centro_trabajo, estado_asignacion, asignado_at);
+CREATE INDEX idx_asignacion_fase_estado ON asignacion_fase(id_fase, estado_asignacion);
+
+-- 9. Triggers para restricciones adicionales
+
+-- a) Compatibilidad de tipo: centro_trabajo.id_fase_tipo debe coincidir con orden_fase.id_fase_tipo en cada asignación
+DELIMITER $$
+CREATE TRIGGER trg_check_tipo_compatibilidad BEFORE INSERT ON asignacion_fase
+FOR EACH ROW
+BEGIN
+    DECLARE fase_tipo_id INT;
+    DECLARE centro_tipo_id INT;
+    SELECT id_fase_tipo INTO fase_tipo_id FROM orden_fase WHERE id_fase = NEW.id_fase;
+    SELECT id_fase_tipo INTO centro_tipo_id FROM centro_trabajo WHERE id_centro_trabajo = NEW.id_centro_trabajo;
+    IF fase_tipo_id != centro_tipo_id THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Tipo de fase y tipo de centro de trabajo no compatibles';
+    END IF;
+END$$
+DELIMITER ;
+
+-- b) Solo una asignación EN_PROCESO por máquina
+DELIMITER $$
+CREATE TRIGGER trg_unico_en_proceso BEFORE INSERT ON asignacion_fase
+FOR EACH ROW
+BEGIN
+    IF NEW.estado_asignacion = 'EN_PROCESO' THEN
+        IF EXISTS (
+            SELECT 1 FROM asignacion_fase
+            WHERE id_centro_trabajo = NEW.id_centro_trabajo
+              AND estado_asignacion = 'EN_PROCESO'
+        ) THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ya existe una asignación EN_PROCESO para este centro de trabajo';
+        END IF;
+    END IF;
+END$$
+DELIMITER ;
+
