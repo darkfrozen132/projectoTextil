@@ -1,0 +1,33 @@
+import { OrdenProduccion } from './orden-produccion.entity';
+import { FaseTipo } from './fase-tipo.entity';
+import { CentroTrabajo } from './centro-trabajo.entity';
+import { AsignacionFase } from './asignacion-fase.entity';
+import { FaseImpresion } from './fase-impresion.entity';
+import { FasePlanchado } from './fase-planchado.entity';
+import { FaseCorteLaser } from './fase-corte-laser.entity';
+export declare class OrdenFase {
+    idFase: number;
+    idOrden: number;
+    idFaseTipo: number;
+    secuencia: number;
+    estado: 'PENDIENTE' | 'LISTA' | 'EN_PROCESO' | 'BLOQUEADA' | 'TERMINADA' | 'CANCELADA';
+    prioridadGuia: number;
+    fechaInicioProg: Date;
+    fechaFinProg: Date;
+    fechaInicioReal: Date;
+    fechaFinReal: Date;
+    cantidadPlan: number;
+    cantidadOk: number;
+    cantidadMerma: number;
+    comentarioGeneral: string;
+    idCentroTrabajo: number;
+    createdAt: Date;
+    updatedAt: Date;
+    orden: OrdenProduccion;
+    faseTipo: FaseTipo;
+    centroTrabajo: CentroTrabajo;
+    asignaciones: AsignacionFase[];
+    faseImpresion: FaseImpresion;
+    fasePlanchado: FasePlanchado;
+    faseCorteLaser: FaseCorteLaser;
+}
